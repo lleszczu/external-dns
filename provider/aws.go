@@ -109,9 +109,9 @@ func NewAWSProvider(domainFilter DomainFilter, zoneTypeFilter ZoneTypeFilter, dr
 // Zones returns the list of hosted zones.
 func (p *AWSProvider) Zones() (map[string]*route53.HostedZone, error) {
 	zones := make(map[string]*route53.HostedZone)
-
 	f := func(resp *route53.ListHostedZonesOutput, lastPage bool) (shouldContinue bool) {
 		for _, zone := range resp.HostedZones {
+
 			if !p.zoneTypeFilter.Match(zone) {
 				continue
 			}
@@ -186,7 +186,8 @@ func (p *AWSProvider) Records() (endpoints []*endpoint.Endpoint, _ error) {
 		}
 
 		if err := p.client.ListResourceRecordSetsPages(params, f); err != nil {
-			return nil, err
+			log.Warning("Failed to list records from %s.", aws.StringValue(z.Id))
+			continue
 		}
 	}
 
